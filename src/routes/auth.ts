@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { createDB } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
 
 type Bindings = {
   DB: D1Database;
@@ -19,19 +18,18 @@ authRoutes.post('/dev-login', async (c) => {
     const db = createDB(c.env.DB);
     const devOpenid = 'dev_user_001';
     
-    // 查找或创建开发用户
-    let user = await db.select().from(users).where(eq(users.openid, devOpenid)).get();
+    // 查找或创建开发用�?    let user = await db.select().from(users).where(eq(users.openid, devOpenid)).get();
     let isNewUser = false;
 
     if (!user) {
       isNewUser = true;
-      const userId = uuidv4();
+      const userId = crypto.randomUUID();
       const now = new Date();
       
       await db.insert(users).values({
         id: userId,
         openid: devOpenid,
-        nickname: '开发测试用户',
+        nickname: '开发测试用�?,
         avatar: null,
         familyId: null,
         createdAt: now,
@@ -61,7 +59,7 @@ authRoutes.post('/dev-login', async (c) => {
       },
     });
   } catch (err) {
-    console.error('开发登录错误:', err);
+    console.error('开发登录错�?', err);
     return c.json({ code: 1005, message: '登录失败' });
   }
 });
@@ -92,14 +90,12 @@ authRoutes.post('/wx-login', async (c) => {
     const { openid, session_key } = wxData;
     const db = createDB(c.env.DB);
 
-    // 查找或创建用户
-    let user = await db.select().from(users).where(eq(users.openid, openid)).get();
+    // 查找或创建用�?    let user = await db.select().from(users).where(eq(users.openid, openid)).get();
     let isNewUser = false;
 
     if (!user) {
-      // 新用户
-      isNewUser = true;
-      const userId = uuidv4();
+      // 新用�?      isNewUser = true;
+      const userId = crypto.randomUUID();
       const now = new Date();
       
       await db.insert(users).values({
@@ -147,8 +143,7 @@ async function generateJWT(payload: any, secret: string): Promise<string> {
   const body = btoa(JSON.stringify({
     ...payload,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7天过期
-  }));
+    exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7天过�?  }));
   
   const signature = await crypto.subtle.sign(
     'HMAC',

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { createDB } from '../db';
 import { expenses, expenseTags, categories, tags, users } from '../db/schema';
 import { eq, and, gte, lte, desc, count, sql } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
+
 
 type Bindings = {
   DB: D1Database;
@@ -15,7 +15,7 @@ export const expenseRoutes = new Hono<{ Bindings: Bindings }>();
 expenseRoutes.use('*', async (c, next) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return c.json({ code: 1001, message: '未授权' }, 401);
+    return c.json({ code: 1001, message: '未授�? }, 401);
   }
   try {
     const token = authHeader.replace('Bearer ', '');
@@ -74,8 +74,7 @@ expenseRoutes.get('/', async (c) => {
     .offset(offset)
     .all();
 
-    // 补充分类和用户信息
-    const enriched = await Promise.all(list.map(async (item) => {
+    // 补充分类和用户信�?    const enriched = await Promise.all(list.map(async (item) => {
       const category = await db.select().from(categories).where(eq(categories.id, item.categoryId)).get();
       const subCategory = item.subCategoryId ? 
         await db.select().from(categories).where(eq(categories.id, item.subCategoryId)).get() : null;
@@ -126,8 +125,7 @@ expenseRoutes.get('/sync', async (c) => {
     // 构建查询条件
     let where = familyId ? eq(expenses.familyId, familyId) : eq(expenses.userId, userId);
     
-    // 获取指定时间之后更新的记录
-    if (since) {
+    // 获取指定时间之后更新的记�?    if (since) {
       where = and(where, gte(expenses.updatedAt, new Date(since)))!;
     }
     
@@ -135,8 +133,7 @@ expenseRoutes.get('/sync', async (c) => {
       where = and(where, gte(expenses.date, new Date(startDate)), lte(expenses.date, new Date(endDate)))!;
     }
 
-    // 查询更新的记录
-    const updates = await db.select({
+    // 查询更新的记�?    const updates = await db.select({
       id: expenses.id,
       userId: expenses.userId,
       familyId: expenses.familyId,
@@ -179,8 +176,7 @@ expenseRoutes.get('/sync', async (c) => {
       };
     }));
 
-    // 查询删除的记录（通过标记删除，或者查询已删除的ID）
-    // 这里简化处理，实际项目中应该有 deleted_at 字段
+    // 查询删除的记录（通过标记删除，或者查询已删除的ID�?    // 这里简化处理，实际项目中应该有 deleted_at 字段
     const deletes: string[] = [];
 
     return c.json({
@@ -207,7 +203,7 @@ expenseRoutes.get('/:id', async (c) => {
     const expense = await db.select().from(expenses).where(eq(expenses.id, expenseId)).get();
     
     if (!expense) {
-      return c.json({ code: 1004, message: '记录不存在' });
+      return c.json({ code: 1004, message: '记录不存�? });
     }
 
     // 获取分类信息
@@ -253,10 +249,10 @@ expenseRoutes.post('/', async (c) => {
     const familyId = c.req.header('X-Family-Id');
 
     if (!amount || !categoryId) {
-      return c.json({ code: 1003, message: '金额和分类必填' });
+      return c.json({ code: 1003, message: '金额和分类必�? });
     }
 
-    const expenseId = uuidv4();
+    const expenseId = crypto.randomUUID();
     const now = new Date();
 
     await db.insert(expenses).values({
@@ -276,7 +272,7 @@ expenseRoutes.post('/', async (c) => {
     if (tagIds && tagIds.length > 0) {
       await db.insert(expenseTags).values(
         tagIds.map((tagId: string) => ({
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           expenseId,
           tagId,
         }))
@@ -299,10 +295,10 @@ expenseRoutes.delete('/:id', async (c) => {
 
     const expense = await db.select().from(expenses).where(eq(expenses.id, expenseId)).get();
     if (!expense) {
-      return c.json({ code: 1004, message: '记录不存在' });
+      return c.json({ code: 1004, message: '记录不存�? });
     }
     if (expense.userId !== userId) {
-      return c.json({ code: 1003, message: '无权删除此记录' });
+      return c.json({ code: 1003, message: '无权删除此记�? });
     }
 
     // 删除标签关联

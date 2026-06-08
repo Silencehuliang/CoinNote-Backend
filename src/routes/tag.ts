@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { createDB } from '../db';
 import { tags } from '../db/schema';
 import { eq, or, isNull } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid';
+
 
 type Bindings = {
   DB: D1Database;
@@ -15,7 +15,7 @@ export const tagRoutes = new Hono<{ Bindings: Bindings }>();
 tagRoutes.use('*', async (c, next) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return c.json({ code: 1001, message: '未授权' }, 401);
+    return c.json({ code: 1001, message: '未授�? }, 401);
   }
   try {
     const token = authHeader.replace('Bearer ', '');
@@ -52,10 +52,10 @@ tagRoutes.post('/', async (c) => {
     const db = createDB(c.env.DB);
 
     if (!name) {
-      return c.json({ code: 1003, message: '请输入标签名称' });
+      return c.json({ code: 1003, message: '请输入标签名�? });
     }
 
-    const tagId = uuidv4();
+    const tagId = crypto.randomUUID();
     await db.insert(tags).values({
       id: tagId,
       name,
@@ -80,10 +80,10 @@ tagRoutes.delete('/:id', async (c) => {
 
     const tag = await db.select().from(tags).where(eq(tags.id, tagId)).get();
     if (!tag) {
-      return c.json({ code: 1004, message: '标签不存在' });
+      return c.json({ code: 1004, message: '标签不存�? });
     }
     if (!tag.userId || tag.userId !== userId) {
-      return c.json({ code: 1003, message: '无权删除此标签' });
+      return c.json({ code: 1003, message: '无权删除此标�? });
     }
 
     await db.delete(tags).where(eq(tags.id, tagId));
