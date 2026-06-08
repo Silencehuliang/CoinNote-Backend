@@ -26,7 +26,7 @@ authRoutes.post('/dev-login', async (c) => {
     if (!user) {
       isNewUser = true;
       const userId = crypto.randomUUID();
-      const now = Math.floor(Date.now() / 1000);
+      const now = Date.now();
       
       await db.insert(users).values({
         id: userId,
