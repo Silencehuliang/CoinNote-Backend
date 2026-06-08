@@ -37,7 +37,7 @@ importExportRoutes.post('/expenses', async (c) => {
 
     let where = familyId ? eq(expenses.familyId, familyId) : eq(expenses.userId, userId);
     if (startDate && endDate) {
-      where = and(where, gte(expenses.date, new Date(startDate)), lte(expenses.date, new Date(endDate)))!;
+      where = and(where, gte(expenses.date, startDate), lte(expenses.date, endDate))!;
     }
 
     // 查询消费记录
@@ -54,9 +54,9 @@ importExportRoutes.post('/expenses', async (c) => {
       userId,
       familyId: familyId || null,
       fileUrl: filePath,
-      startDate: startDate ? new Date(startDate) : null,
-      endDate: endDate ? new Date(endDate) : null,
-      createdAt: new Date(),
+      startDate: startDate || null,
+      endDate: endDate || null,
+      createdAt: Date.now(),
     });
 
     // 生成下载URL（简化版，实际需要生成预签名URL）

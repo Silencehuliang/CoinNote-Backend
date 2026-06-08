@@ -45,7 +45,7 @@ expenseRoutes.get('/', async (c) => {
       where = eq(expenses.familyId, familyId);
     }
     if (startDate && endDate) {
-      where = and(where, gte(expenses.date, new Date(startDate)), lte(expenses.date, new Date(endDate)))!;
+      where = and(where, gte(expenses.date, startDate), lte(expenses.date, endDate))!;
     }
     if (categoryId) {
       where = and(where, eq(expenses.categoryId, categoryId))!;
@@ -108,9 +108,9 @@ expenseRoutes.get('/', async (c) => {
         pageSize: pageSizeNum,
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('获取消费记录失败:', err);
-    return c.json({ code: 1005, message: '获取失败' });
+    return c.json({ code: 1005, message: `获取失败: ${err.message}` });
   }
 });
 
@@ -127,11 +127,11 @@ expenseRoutes.get('/sync', async (c) => {
     
     // 获取指定时间之后更新的记录
     if (since) {
-      where = and(where, gte(expenses.updatedAt, new Date(since)))!;
+      where = and(where, gte(expenses.updatedAt, parseInt(since)))!;
     }
     
     if (startDate && endDate) {
-      where = and(where, gte(expenses.date, new Date(startDate)), lte(expenses.date, new Date(endDate)))!;
+      where = and(where, gte(expenses.date, startDate), lte(expenses.date, endDate))!;
     }
 
     // 查询更新的记录
@@ -256,7 +256,7 @@ expenseRoutes.post('/', async (c) => {
     }
 
     const expenseId = crypto.randomUUID();
-    const now = new Date();
+    const now = Date.now();
 
     await db.insert(expenses).values({
       id: expenseId,
@@ -266,7 +266,7 @@ expenseRoutes.post('/', async (c) => {
       categoryId,
       subCategoryId: subCategoryId || null,
       description: description || null,
-      date: new Date(date || now),
+      date: date || new Date().toISOString().split('T')[0],
       createdAt: now,
       updatedAt: now,
     });
