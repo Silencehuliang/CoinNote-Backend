@@ -1,0 +1,17 @@
+name = "cent-hl-backend"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+WX_APP_ID = "your-wx-app-id"
+WX_APP_SECRET = "your-wx-app-secret"
+JWT_SECRET = "your-jwt-secret"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cent-hl-db"
+database_id = "your-database-id"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "cent-hl-files"
