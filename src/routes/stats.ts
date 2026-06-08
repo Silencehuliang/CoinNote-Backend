@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+﻿import { Hono } from 'hono';
 import { createDB } from '../db';
 import { expenses, categories, tags, users, expenseTags } from '../db/schema';
 import { eq, and, gte, lte, sql, sum, count } from 'drizzle-orm';
@@ -10,11 +10,11 @@ type Bindings = {
 
 export const statsRoutes = new Hono<{ Bindings: Bindings }>();
 
-// 中间件：验证JWT
+// 涓棿浠讹細楠岃瘉JWT
 statsRoutes.use('*', async (c, next) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return c.json({ code: 1001, message: '未授�? }, 401);
+    return c.json({ code: 1001, message: '鏈巿鏉? }, 401);
   }
   try {
     const token = authHeader.replace('Bearer ', '');
@@ -22,11 +22,12 @@ statsRoutes.use('*', async (c, next) => {
     c.set('userId', payload.userId);
     await next();
   } catch (err) {
-    return c.json({ code: 1002, message: 'token无效或已过期' }, 401);
+    return c.json({ code: 1002, message: 'token鏃犳晥鎴栧凡杩囨湡' }, 401);
   }
 });
 
-// 按时间统�?statsRoutes.get('/by-time', async (c) => {
+// 鎸夋椂闂寸粺璁?
+statsRoutes.get('/by-time', async (c) => {
   try {
     const userId = c.get('userId') as string;
     const db = createDB(c.env.DB);
@@ -38,12 +39,14 @@ statsRoutes.use('*', async (c, next) => {
       where = and(where, gte(expenses.date, startDate), lte(expenses.date, endDate))!;
     }
 
-    // 查询总金额和总笔�?    const totalResult = await db.select({
+    // 鏌ヨ鎬婚噾棰濆拰鎬荤瑪鏁?
+    const totalResult = await db.select({
       total: sum(expenses.amount),
       count: count(),
     }).from(expenses).where(where).get();
 
-    // 按时间分组统�?    let dateFormat;
+    // 鎸夋椂闂村垎缁勭粺璁?
+    let dateFormat;
     switch (groupBy) {
       case 'day':
         dateFormat = '%Y-%m-%d';
@@ -77,12 +80,13 @@ statsRoutes.use('*', async (c, next) => {
       },
     });
   } catch (err) {
-    console.error('统计失败:', err);
-    return c.json({ code: 1005, message: '统计失败' });
+    console.error('缁熻澶辫触:', err);
+    return c.json({ code: 1005, message: '缁熻澶辫触' });
   }
 });
 
-// 按分类统�?statsRoutes.get('/by-category', async (c) => {
+// 鎸夊垎绫荤粺璁?
+statsRoutes.get('/by-category', async (c) => {
   try {
     const userId = c.get('userId') as string;
     const db = createDB(c.env.DB);
@@ -111,8 +115,8 @@ statsRoutes.use('*', async (c, next) => {
       const category = await db.select().from(categories).where(eq(categories.id, item.categoryId)).get();
       return {
         categoryId: item.categoryId,
-        categoryName: category?.name || '未分�?,
-        categoryIcon: category?.icon || '📦',
+        categoryName: category?.name || '鏈垎绫?,
+        categoryIcon: category?.icon || '馃摝',
         amount: item.amount || 0,
         percentage: total > 0 ? ((item.amount || 0) / total) * 100 : 0,
         count: item.count,
@@ -124,12 +128,13 @@ statsRoutes.use('*', async (c, next) => {
       data: { total, items },
     });
   } catch (err) {
-    console.error('统计失败:', err);
-    return c.json({ code: 1005, message: '统计失败' });
+    console.error('缁熻澶辫触:', err);
+    return c.json({ code: 1005, message: '缁熻澶辫触' });
   }
 });
 
-// 按用户统�?statsRoutes.get('/by-user', async (c) => {
+// 鎸夌敤鎴风粺璁?
+statsRoutes.get('/by-user', async (c) => {
   try {
     const userId = c.get('userId') as string;
     const db = createDB(c.env.DB);
@@ -158,7 +163,7 @@ statsRoutes.use('*', async (c, next) => {
       const user = await db.select().from(users).where(eq(users.id, item.userId)).get();
       return {
         userId: item.userId,
-        nickname: user?.nickname || '未知用户',
+        nickname: user?.nickname || '鏈煡鐢ㄦ埛',
         avatar: user?.avatar || null,
         amount: item.amount || 0,
         percentage: total > 0 ? ((item.amount || 0) / total) * 100 : 0,
@@ -171,12 +176,13 @@ statsRoutes.use('*', async (c, next) => {
       data: { total, items },
     });
   } catch (err) {
-    console.error('统计失败:', err);
-    return c.json({ code: 1005, message: '统计失败' });
+    console.error('缁熻澶辫触:', err);
+    return c.json({ code: 1005, message: '缁熻澶辫触' });
   }
 });
 
-// 按标签统�?statsRoutes.get('/by-tag', async (c) => {
+// 鎸夋爣绛剧粺璁?
+statsRoutes.get('/by-tag', async (c) => {
   try {
     const userId = c.get('userId') as string;
     const db = createDB(c.env.DB);
@@ -188,7 +194,7 @@ statsRoutes.use('*', async (c, next) => {
       where = and(where, gte(expenses.date, startDate), lte(expenses.date, endDate))!;
     }
 
-    // 获取有标签的消费记录
+    // 鑾峰彇鏈夋爣绛剧殑娑堣垂璁板綍
     const result = await db.select({
       tagId: expenseTags.tagId,
       amount: sum(expenses.amount),
@@ -205,7 +211,7 @@ statsRoutes.use('*', async (c, next) => {
       const tag = await db.select().from(tags).where(eq(tags.id, item.tagId)).get();
       return {
         tagId: item.tagId,
-        tagName: tag?.name || '未知标签',
+        tagName: tag?.name || '鏈煡鏍囩',
         amount: item.amount || 0,
         count: item.count,
       };
@@ -213,12 +219,12 @@ statsRoutes.use('*', async (c, next) => {
 
     return c.json({ code: 0, data: { items } });
   } catch (err) {
-    console.error('统计失败:', err);
-    return c.json({ code: 1005, message: '统计失败' });
+    console.error('缁熻澶辫触:', err);
+    return c.json({ code: 1005, message: '缁熻澶辫触' });
   }
 });
 
-// 验证 JWT
+// 楠岃瘉 JWT
 async function verifyJWT(token: string, secret: string): Promise<any> {
   const [header, body, signature] = token.split('.');
   const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
