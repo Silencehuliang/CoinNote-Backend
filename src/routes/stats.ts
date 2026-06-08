@@ -72,11 +72,18 @@ statsRoutes.get('/by-time', async (c) => {
     .orderBy(sql`strftime(${dateFormat}, ${expenses.date})`)
     .all();
 
+    // 确保 amount 是数字类型
+    const total = Number(totalResult?.total) || 0;
+    const formattedItems = items.map(item => ({
+      ...item,
+      amount: Number(item.amount) || 0,
+    }));
+
     return c.json({
       code: 0,
       data: {
-        total: totalResult?.total || 0,
-        items,
+        total: total,
+        items: formattedItems,
       },
     });
   } catch (err) {
@@ -109,16 +116,18 @@ statsRoutes.get('/by-category', async (c) => {
     .orderBy(sql`sum(${expenses.amount}) desc`)
     .all();
 
-    const total = result.reduce((acc, item) => acc + (item.amount || 0), 0);
+    // 确保 amount 是数字类型
+    const total = result.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
 
     const items = await Promise.all(result.map(async (item) => {
       const category = await db.select().from(categories).where(eq(categories.id, item.categoryId)).get();
+      const amount = Number(item.amount) || 0;
       return {
         categoryId: item.categoryId,
         categoryName: category?.name || '未分类',
         categoryIcon: category?.icon || '📦',
-        amount: item.amount || 0,
-        percentage: total > 0 ? ((item.amount || 0) / total) * 100 : 0,
+        amount: amount,
+        percentage: total > 0 ? (amount / total) * 100 : 0,
         count: item.count,
       };
     }));
@@ -157,16 +166,18 @@ statsRoutes.get('/by-user', async (c) => {
     .orderBy(sql`sum(${expenses.amount}) desc`)
     .all();
 
-    const total = result.reduce((acc, item) => acc + (item.amount || 0), 0);
+    // 确保 amount 是数字类型
+    const total = result.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
 
     const items = await Promise.all(result.map(async (item) => {
       const user = await db.select().from(users).where(eq(users.id, item.userId)).get();
+      const amount = Number(item.amount) || 0;
       return {
         userId: item.userId,
         nickname: user?.nickname || '未知用户',
         avatar: user?.avatar || null,
-        amount: item.amount || 0,
-        percentage: total > 0 ? ((item.amount || 0) / total) * 100 : 0,
+        amount: amount,
+        percentage: total > 0 ? (amount / total) * 100 : 0,
         count: item.count,
       };
     }));

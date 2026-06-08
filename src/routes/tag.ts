@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { createDB } from '../db';
 import { tags } from '../db/schema';
-import { eq, or, isNull } from 'drizzle-orm';
+import { eq, or, isNull, sql } from 'drizzle-orm';
 
 type Bindings = {
   DB: D1Database;
@@ -23,6 +23,30 @@ tagRoutes.use('*', async (c, next) => {
     await next();
   } catch (err) {
     return c.json({ code: 1002, message: 'token无效或已过期' }, 401);
+  }
+});
+
+// 获取标签版本（用于缓存校验）
+tagRoutes.get('/version', async (c) => {
+  try {
+    const db = createDB(c.env.DB);
+    
+    // 获取最新的创建时间作为版本号
+    const result = await db.select({
+      maxVersion: sql`MAX(created_at)`,
+    }).from(tags).get();
+
+    const version = result?.maxVersion || 0;
+    const clientVersion = parseInt(c.req.query('version') || '0');
+
+    return c.json({
+      code: 0,
+      version,
+      needUpdate: version > clientVersion,
+    });
+  } catch (err) {
+    console.error('获取标签版本失败:', err);
+    return c.json({ code: 1005, message: '获取失败' });
   }
 });
 
