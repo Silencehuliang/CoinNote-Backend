@@ -1,14 +1,14 @@
 {
-  "name": "cent-hl-backend",
+  "name": "coinnote-backend",
   "version": "1.0.0",
-  "description": "消费记录小程序后端服务",
+  "description": "CoinNote 家庭记账小程序后端服务",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "db:generate": "drizzle-kit generate:sqlite",
-    "db:migrate": "wrangler d1 migrations apply cent-hl-db --local",
-    "db:migrate:remote": "wrangler d1 migrations apply cent-hl-db",
+    "db:migrate": "wrangler d1 migrations apply coinnote-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply coinnote-db",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
