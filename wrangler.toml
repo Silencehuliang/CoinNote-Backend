@@ -10,7 +10,7 @@ JWT_SECRET = "your-jwt-secret-key-change-this"
 [[d1_databases]]
 binding = "DB"
 database_name = "coinnote-db"
-database_id = "your-database-id"
+database_id = "352b0a82-bc19-4035-b84b-bb5c629eb06a"
 
 # R2 存储（可选，需要时再启用）
 # [[r2_buckets]]
