@@ -60,9 +60,9 @@ authRoutes.post('/dev-login', async (c) => {
         },
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('开发登录错误:', err);
-    return c.json({ code: 1005, message: '登录失败' });
+    return c.json({ code: 1005, message: `登录失败: ${err.message || '未知错误'}` });
   }
 });
 
