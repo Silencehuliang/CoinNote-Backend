@@ -53,18 +53,10 @@ categoryRoutes.get('/version', async (c) => {
 // 获取分类列表（树形结构）
 categoryRoutes.get('/', async (c) => {
   try {
-    const userId = c.get('userId') as string;
     const db = createDB(c.env.DB);
 
-    // 获取系统分类（userId为null）和用户自定义分类
-    const allCategories = await db.select().from(categories)
-      .where(
-        or(
-          isNull(categories.userId),
-          eq(categories.userId, userId)
-        )
-      )
-      .all();
+    // 获取所有分类
+    const allCategories = await db.select().from(categories).all();
 
     // 构建树形结构
     const rootCategories = allCategories.filter(cat => !cat.parentId);
@@ -73,16 +65,10 @@ categoryRoutes.get('/', async (c) => {
       children: allCategories.filter(cat => cat.parentId === root.id),
     }));
 
-    // 获取版本号
-    const versionResult = await db.select({
-      maxVersion: sql`MAX(updated_at)`,
-    }).from(categories).get();
-    const version = versionResult?.maxVersion ? new Date(versionResult.maxVersion).getTime() : 0;
-
-    return c.json({ code: 0, data: tree, version });
-  } catch (err) {
+    return c.json({ code: 0, data: tree });
+  } catch (err: any) {
     console.error('获取分类失败:', err);
-    return c.json({ code: 1005, message: '获取失败' });
+    return c.json({ code: 1005, message: `获取失败: ${err.message}` });
   }
 });
 
