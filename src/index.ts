@@ -14,7 +14,7 @@ import { uploadRoutes } from './routes/upload';
 
 type Bindings = {
   DB: D1Database;
-  BUCKET: R2Bucket;
+  BUCKET?: R2Bucket;  // R2 可选
   WX_APP_ID: string;
   WX_APP_SECRET: string;
   JWT_SECRET: string;
